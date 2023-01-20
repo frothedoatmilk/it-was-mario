@@ -186,9 +186,7 @@ int main(int argc, char* argv[]) {
 			decres = min(1.0, 0.00012*(sampleRate*seconds-index-2500));
 			for(int k = 0; k < length; k++) {
 				float toAdd = decres * amplitude * sin(2*M_PI*index*notes[k]/sampleRate);
-				if(toAdd > 1) { std::cout << "Current addition exceeds 1!" << std::endl; }
-				data += toAdd;
-				data /= length;
+				data += toAdd / length;
 			} // end k for
 			index++;
 			// Make int
