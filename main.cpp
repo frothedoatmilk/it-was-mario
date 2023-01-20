@@ -106,18 +106,18 @@ float min(float a, float b) {
 	else      return b;
 } // end min
 
-int main() {
+int main(int argc, char* argv[]) {
 
     std::vector<float> durations;
     std::vector<std::string> chords;
 
     // THIS IS NOT IMPLEMENTED. 
     std::cout << "Parsing something..." << std::endl;
-    parseInputFile(NULL, &chords, &durations);
+    parseInputFile(NULL, chords, durations);
     std::cout << "Parsed! Found " << chords.size() << " chords." << std::endl;
 	
     float beats = 0;
-	int numChords = 0;
+	int numChords = -1;
 	for(int i = 0; i < durations.size(); i++) {
 		beats += durations[i];
 		numChords++;
@@ -128,7 +128,17 @@ int main() {
 	long long index = 0;
 
     // Speed and volume settings
-    float amplitude = 0.2;
+	float amplitude = 0.2;
+	
+	if(argc == 2) {
+		std::cout << "New amplitude found in arguments..." << std::endl;
+		float checkAmp = std::stof(argv[1]);
+		if(checkAmp >= 0.0 && checkAmp <= 1.0) {
+			amplitude = checkAmp;
+			std::cout << "New amplitude is: " << checkAmp << std::endl;
+		}
+	}
+
 	const float bpm = 180;
 	const float seconds = beats * 60 / bpm;
 
@@ -171,16 +181,19 @@ int main() {
     std::cout << "Processing " << numChords << " chords..." << std::endl;
 	for(int i = 0; i < numChords; i++) {
 		parseNotes(&chords[i], notes, &length);
-		printf("%i", length);
 		for(int j = 0; j < sampleRate*seconds*durations[i]/beats; j++) {
 			data = 0;
 			decres = min(1.0, 0.00012*(sampleRate*seconds-index-2500));
 			for(int k = 0; k < length; k++) {
-				data += decres * amplitude * sin(2*M_PI*index*notes[k]/sampleRate);
+				float toAdd = decres * amplitude * sin(2*M_PI*index*notes[k]/sampleRate);
+				if(toAdd > 1) { std::cout << "Current addition exceeds 1!" << std::endl; }
+				data += toAdd;
+				data /= length;
 			} // end k for
 			index++;
 			// Make int
 			dataint = data * pow(2, bitsPerSample);
+			if(dataint >= pow(2, bitsPerSample)) { std::cout << "Writing impossible value to WAV at sample " << index << "!" << std::endl; }
 			// Write left
 			fwrite(&dataint, sizeof(data), 1, wav);
 			// Write right
