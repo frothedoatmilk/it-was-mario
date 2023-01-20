@@ -24,7 +24,7 @@
 enum State{NO_NOTE, NOTE, VALID};
 enum Accidental{NONE, SHARP, FLAT};
 
-void parseNotes(const std::string* CHORD, float notes[10], int* length) {
+void parseNotes(const std::string &CHORD, float notes[10], int* length) {
 	// create the twelvth roots of 2
 	float twelve[12];
 	for(int i = 0; i < 12; i++) {
@@ -36,8 +36,8 @@ void parseNotes(const std::string* CHORD, float notes[10], int* length) {
 	enum Accidental acc = NONE;
 	char note;
 	int num;
-	char* index = new char[(*CHORD).length() + 1];
-    strcpy(index, (*CHORD).c_str());
+	char* index = new char[CHORD.length() + 1];
+    strncpy(index, CHORD.c_str(), CHORD.size());
 	while(*index != 0) {
 		switch(state) {
 			case NO_NOTE:
@@ -52,10 +52,10 @@ void parseNotes(const std::string* CHORD, float notes[10], int* length) {
 				if('0' <= *index && *index <= '9') {
 					num = *index - '0';
 					state = VALID;
-				} 
+				}
 				break;
 			default:
-				0; // Empty statement
+				break;
 		} // end switch
 		if(state == VALID) {
 			float offset = 27.5 * pow(2, num);
@@ -84,7 +84,7 @@ void parseNotes(const std::string* CHORD, float notes[10], int* length) {
 					shift = 10;
 					break;
 				default:
-					0;
+					break;
 			} // end switch
 			if(acc == SHARP) shift++;
 			if(acc == FLAT)  shift--;
@@ -180,7 +180,7 @@ int main(int argc, char* argv[]) {
 
     std::cout << "Processing " << numChords << " chords..." << std::endl;
 	for(int i = 0; i < numChords; i++) {
-		parseNotes(&chords[i], notes, &length);
+		parseNotes(chords[i], notes, &length);
 		for(int j = 0; j < sampleRate*seconds*durations[i]/beats; j++) {
 			data = 0;
 			decres = min(1.0, 0.00012*(sampleRate*seconds-index-2500));
