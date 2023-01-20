@@ -1,8 +1,21 @@
 #include <stdio.h>
 #include <math.h>
 #include <iostream>
+
+#ifndef STRINGLIBS
 #include <string>
 #include <cstring>
+#endif
+
+#ifndef FILELIB
+#include <cstdio>
+#endif
+
+#ifndef VECTOR
+#include <vector>
+#endif
+
+#include "file_parse.h"
 
 // Easier to process notes with these enums
 enum State{NO_NOTE, NOTE, VALID};
@@ -92,14 +105,17 @@ float min(float a, float b) {
 
 int main() {
 
-    // 10 is arbitrary, use the open file to dictate the size of the arrays...
-    float* durations = new float[10];
-    std::string** chords = new std::string* [10];
-    // TODO: read a file and parse into a paired set of arrays: durations[] and chords[]
+    std::vector<float> durations;
+    std::vector<std::string> chords;
 
-	float beats = 0;
+    // THIS IS NOT IMPLEMENTED. 
+    std::cout << "Parsing something..." << std::endl;
+    parseInputFile(NULL, &chords, &durations);
+    std::cout << "Parsed! Found " << chords.size() << " chords." << std::endl;
+	
+    float beats = 0;
 	int numChords = 0;
-	for(int i = 0; durations[i] != 0; i++) {
+	for(int i = 0; i < durations.size(); i++) {
 		beats += durations[i];
 		numChords++;
 	} // end for
@@ -128,6 +144,7 @@ int main() {
 
 	const int chunkSize = subchunk1Size + subchunk2Size + 20;
 
+    std::cout << "Opening and formatting WAV..." << std::endl;
     // Write the wav header
 	FILE* wav = fopen("test.wav", "wb");
 	fwrite("RIFF", sizeof(char), 4, wav);
@@ -148,8 +165,9 @@ int main() {
 	float notes[10];
 	int length;
 
+    std::cout << "Processing " << numChords << " chords..." << std::endl;
 	for(int i = 0; i < numChords; i++) {
-		parseNotes(chords[i], notes, &length);
+		parseNotes(&chords[i], notes, &length);
 		printf("%i", length);
 		for(int j = 0; j < sampleRate*seconds*durations[i]/beats; j++) {
 			data = 0;
