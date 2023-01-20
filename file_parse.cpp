@@ -13,8 +13,12 @@
 #include <vector>
 #endif
 
+#ifndef IO
+#include <iostream>
+#endif
+
 void parseInputFile (FILE* toParse, std::vector<std::string>* chordArray, std::vector<float>* durationArray){
-    chordArray = new std::vector<std::string>{"D2E4", "", "D2E4", "", "D2E4", "", "D2C4", "D2E4", "G2G4", "", "G1G3", "",
+    std::vector<std::string> chordArr ({"D2E4", "", "D2E4", "", "D2E4", "", "D2C4", "D2E4", "G2G4", "", "G1G3", "",
 	                  "G2C4", "", "E2G3", "", "C2E3", "", "F2A4", "G2B4", "Gb2Bb4", "F2A4", "E2G3", 
 			  "C3E4", "E3G4", "F3A5", "D3F4", "E3G4", "", "C3E4", "A3C4", "B3D4", "G2B4", "",
 	                  "G2C4", "", "E2G3", "", "C2E3", "", "F2A4", "G2B4", "Gb2Bb4", "F2A4", "E2G3", 
@@ -83,9 +87,9 @@ void parseInputFile (FILE* toParse, std::vector<std::string>* chordArray, std::v
 			  "G2", "G2E3", "C2C3", "",
 	
 			  "G2C4", "", "E2G3", "", "C2E3", "F2A4", "F2B4", "F2A4", "Db2Ab4", "Db2Bb4", "Db2Ab4",
-			  "C2E3", "C2D3", "C2E3"};
+			  "C2E3", "C2D3", "C2E3"});
 	
-	durationArray = new std::vector<float>{2./5, 1./10, 1./2, 1./2, 1./2, 1./2, 1./2, 1, 1, 1, 1, 1, 
+	std::vector<float> durationArr ({2./5, 1./10, 1./2, 1./2, 1./2, 1./2, 1./2, 1, 1, 1, 1, 1, 
 		           1, 1./2, 1, 1./2, 1, 1./2, 1, 1, 1./2, 1, 2./3, 
 			   2./3, 2./3, 1, 1./2, 1./2, 1./2, 1, 1./2, 1./2, 1, 1./2, 
 		           1, 1./2, 1, 1./2, 1, 1./2, 1, 1, 1./2, 1, 2./3, 
@@ -142,6 +146,8 @@ void parseInputFile (FILE* toParse, std::vector<std::string>* chordArray, std::v
 			   1./2, 1, 1,
 
 			   1, 1./2, 1, 1./2, 1, 1, 1, 1, 1, 1, 1, 3./4, 3./4, 9./2,
-			   0};
+			   0});
+	chordArray = (&chordArr);
+	durationArray = (&durationArr);
     return;
 }

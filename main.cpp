@@ -1,6 +1,9 @@
 #include <stdio.h>
 #include <math.h>
+
+#ifndef IO
 #include <iostream>
+#endif
 
 #ifndef STRINGLIBS
 #include <string>
