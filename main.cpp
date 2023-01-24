@@ -19,188 +19,105 @@
 #endif
 
 #include "file_parse.h"
-
-// Easier to process notes with these enums
-enum State{NO_NOTE, NOTE, VALID};
-enum Accidental{NONE, SHARP, FLAT};
-
-void parseNotes(const std::string &CHORD, float notes[10], int* length) {
-	// create the twelvth roots of 2
-	float twelve[12];
-	for(int i = 0; i < 12; i++) {
-		twelve[i] = pow(2,i/12.);
-	} // end for
-
-	*length = 0;
-	enum State state = NO_NOTE;
-	enum Accidental acc = NONE;
-	char note;
-	int num;
-	char* index = new char[CHORD.length() + 1];
-    strncpy(index, CHORD.c_str(), CHORD.size());
-	while(*index != 0) {
-		switch(state) {
-			case NO_NOTE:
-				if('A' <= *index && *index <= 'G') {
-					note = *index;
-					state = NOTE;
-				}
-				break;
-			case NOTE:
-				if(*index == '#') acc = SHARP;
-				if(*index == 'b') acc = FLAT;
-				if('0' <= *index && *index <= '9') {
-					num = *index - '0';
-					state = VALID;
-				}
-				break;
-			default:
-				break;
-		} // end switch
-		if(state == VALID) {
-			float offset = 27.5 * pow(2, num);
-			int shift;
-			float letter;
-			switch(note) {
-				case 'A':
-					shift = 0;
-					break;
-				case 'B':
-					shift = 2;
-					break;
-				case 'C':
-					shift = 3;
-					break;
-				case 'D':
-					shift = 5;
-					break;
-				case 'E':
-					shift = 7;
-					break;
-				case 'F':
-					shift = 8;
-					break;
-				case 'G':
-					shift = 10;
-					break;
-				default:
-					break;
-			} // end switch
-			if(acc == SHARP) shift++;
-			if(acc == FLAT)  shift--;
-			letter = offset * pow(2, shift/12.);
-
-			notes[(int) *length] = letter;
-			*length += 1;
-			
-			state = NO_NOTE;
-			acc = NONE;
-		} // end if
-		index++;
-	} // end while
-}
+#include "chord.cpp" // FIXME: I don't know C++ enough to do or care about header files
 
 float min(float a, float b) {
-	if(b < 0) return 0;
-	if(a < b) return a;
-	else      return b;
+    if(b < 0) return 0;
+    if(a < b) return a;
+    else      return b;
 } // end min
 
 int main(int argc, char* argv[]) {
 
+    const float bpm = 180;
     std::vector<float> durations;
-    std::vector<std::string> chords;
+    std::vector<std::string> strings;
+    std::vector<Chord> chord;
 
     // THIS IS NOT IMPLEMENTED. 
     std::cout << "Parsing something..." << std::endl;
-    parseInputFile(NULL, chords, durations);
+    parseInputFile(NULL, strings, durations);
     std::cout << "Parsed! Found " << chords.size() << " chords." << std::endl;
-	
-    float beats = 0;
-	int numChords = -1;
-	for(int i = 0; i < durations.size(); i++) {
-		beats += durations[i];
-		numChords++;
-	} // end for
 
-	float data;
-	int dataint;
-	long long index = 0;
+    double beats = 0.0;
+    for(int i = 0; i < strings.size; i++) {
+        chords.push_back(Chord(strings[i], beats, durations[i], bpm));
+        beats += durations[i];
+    }
+    
+    short data;
+    long long index = 0;
 
     // Speed and volume settings
-	float amplitude = 0.2;
-	
-	if(argc == 2) {
-		std::cout << "New amplitude found in arguments..." << std::endl;
-		float checkAmp = std::stof(argv[1]);
-		if(checkAmp >= 0.0 && checkAmp <= 1.0) {
-			amplitude = checkAmp;
-			std::cout << "New amplitude is: " << checkAmp << std::endl;
-		}
-	}
+    float amplitude = 0.2;
 
-	const float bpm = 180;
-	const float seconds = beats * 60 / bpm;
+    if(argc == 2) {
+        std::cout << "New amplitude found in arguments..." << std::endl;
+        float checkAmp = std::stof(argv[1]);
+        if(checkAmp >= 0.0 && checkAmp <= 1.0) {
+            amplitude = checkAmp;
+            std::cout << "New amplitude is: " << checkAmp << std::endl;
+        }
+    }
 
+    const float seconds = beats * 60 / bpm;
 
-	// Initialize WAV	
+    // Initialize WAV    
     // fmt chunk, also can be used as a config kinda?
-	const int subchunk1Size = 16;
-	const int audioFormat = 1;
-	const int numChannels = 1;
-	const int sampleRate = 44100;
-	const int blockAlign = 4;
-	const int byteRate = sampleRate * blockAlign;
-	const int bitsPerSample = 8 * blockAlign / numChannels;
+    const int subchunk1Size = 16;
+    const int audioFormat = 1;
+    const int numChannels = 1;
+    const int sampleRate = 44100;
+    const int blockAlign = 4;
+    const int byteRate = sampleRate * blockAlign;
+    const int bitsPerSample = 8 * blockAlign / numChannels;
 
-	const int subchunk2Size = sampleRate * blockAlign * (int) (seconds+2);
+    const int subchunk2Size = sampleRate * blockAlign * (int) (seconds+2);
 
-	const int chunkSize = subchunk1Size + subchunk2Size + 20;
+    const int chunkSize = subchunk1Size + subchunk2Size + 20;
 
     std::cout << "Opening and formatting WAV..." << std::endl;
     // Write the wav header
-	FILE* wav = fopen("test.wav", "wb");
-	fwrite("RIFF", sizeof(char), 4, wav);
-	fwrite(&chunkSize, sizeof(chunkSize), 1, wav);
-	fwrite("WAVEfmt ", sizeof(char), 8, wav);
+    FILE* wav = fopen("test.wav", "wb");
+    fwrite("RIFF", sizeof(char), 4, wav);
+    fwrite(&chunkSize, sizeof(chunkSize), 1, wav);
+    fwrite("WAVEfmt ", sizeof(char), 8, wav);
 
-	fwrite(&subchunk1Size , sizeof(int),   1, wav);
-	fwrite(&audioFormat   , sizeof(int)/2, 1, wav);
-	fwrite(&numChannels   , sizeof(int)/2, 1, wav);
-	fwrite(&sampleRate    , sizeof(int),   1, wav);
-	fwrite(&byteRate      , sizeof(int),   1, wav);
-	fwrite(&blockAlign    , sizeof(int)/2, 1, wav);
-	fwrite(&bitsPerSample , sizeof(int)/2, 1, wav);
-	fwrite("data", sizeof(char), 4, wav);
-	fwrite(&subchunk2Size, sizeof(int), 1, wav);
-	
-	double decres;
-	float notes[10];
-	int length;
+    fwrite(&subchunk1Size , sizeof(int),   1, wav);
+    fwrite(&audioFormat   , sizeof(int)/2, 1, wav);
+    fwrite(&numChannels   , sizeof(int)/2, 1, wav);
+    fwrite(&sampleRate    , sizeof(int),   1, wav);
+    fwrite(&byteRate      , sizeof(int),   1, wav);
+    fwrite(&blockAlign    , sizeof(int)/2, 1, wav);
+    fwrite(&bitsPerSample , sizeof(int)/2, 1, wav);
+    fwrite("data", sizeof(char), 4, wav);
+    fwrite(&subchunk2Size, sizeof(int), 1, wav);
+    
+    double decres;
+    float notes[10];
+    int length;
 
     std::cout << "Processing " << numChords << " chords..." << std::endl;
-	for(int i = 0; i < numChords; i++) {
-		parseNotes(chords[i], notes, &length);
-		for(int j = 0; j < sampleRate*seconds*durations[i]/beats; j++) {
-			data = 0;
-			decres = min(1.0, 0.00012*(sampleRate*seconds-index-2500));
-			for(int k = 0; k < length; k++) {
-				float toAdd = decres * amplitude * sin(2*M_PI*index*notes[k]/sampleRate);
-				data += toAdd / length;
-			} // end k for
-			index++;
-			// Make int
-			dataint = data * pow(2, bitsPerSample);
-			if(dataint >= pow(2, bitsPerSample)) { std::cout << "Writing impossible value to WAV at sample " << index << "!" << std::endl; }
-			// Write left
-			fwrite(&dataint, sizeof(data), 1, wav);
-			// Write right
-			if(numChannels == 2) fwrite(&dataint, sizeof(data), 1, wav);
-		} // end j for
-	} // end i for
+    for(int i = 0; i < numChords; i++) {
+        parseNotes(chords[i], notes, &length);
+        for(int j = 0; j < sampleRate*seconds*durations[i]/beats; j++) {
+            data = 0;
+            for(auto & chord : chords) {
+                data += chord.getAmplitude(amplitude, index);
+            } // end k for
+            index++;
+            // Make int
+            //dataint = data * pow(2, bitsPerSample);
+            //if(dataint >= pow(2, bitsPerSample)) { std::cout << "Writing impossible value to WAV at sample " << index << "!" << std::endl; }
+            // Write left
+            fwrite(&dataint, sizeof(data), 1, wav);
+            // Write right
+            if(numChannels == 2) fwrite(&dataint, sizeof(data), 1, wav);
+        } // end j for
+    } // end i for
 
-	fclose(wav);
+    fclose(wav);
 
-	return 0;
+    return 0;
 
 } // end main
