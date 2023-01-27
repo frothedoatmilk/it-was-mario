@@ -1,151 +1,203 @@
 #include "file_parse.h"
 
-#ifndef STRINGLIBS
-#include <string>
-#include <cstring>
-#endif
+enum ReadMode {chordMode, templMode, voiceMode, paramMode, noMode};
 
-#ifndef FILELIB
-#include <cstdio>
-#endif
+Shape stoshape(std::string str) {
+    if(str == "SINE") return sineShape;
+    if(str == "SQUARE") return squareShape;
+    if(str == "TRIANGLE") return triangleShape;
+    if(str == "SAWTOOTH") return sawtoothShape;
+    return errorShape;
+} // end stoshape
 
-#ifndef VECTOR
-#include <vector>
-#endif
+TemplateNote tNote(double pitch, Shape shape, double startSec, double duration) {
+    TemplateNote t;
+    t.pitch = pitch;
+    t.shape = shape;
+    t.startSec = startSec;
+    t.duration = duration;
+    return t;
+} // end tNode
 
-#ifndef IO
-#include <iostream>
-#endif
+Note makeNoteFromTemplate(TemplateNote tn, float startSec) {
+    return Note(tn.pitch, tn.shape, tn.startSec + startSec, tn.duration);
+} // end makeNoteFromTemplate
 
-void parseInputFile (FILE* toParse, std::vector<std::string> & chordArray, std::vector<float> & durationArray){
-    chordArray = {"D2E4", "", "D2E4", "", "D2E4", "", "D2C4", "D2E4", "G2G4", "", "G1G3", "",
-	                  "G2C4", "", "E2G3", "", "C2E3", "", "F2A4", "G2B4", "Gb2Bb4", "F2A4", "E2G3", 
-			  "C3E4", "E3G4", "F3A5", "D3F4", "E3G4", "", "C3E4", "A3C4", "B3D4", "G2B4", "",
-	                  "G2C4", "", "E2G3", "", "C2E3", "", "F2A4", "G2B4", "Gb2Bb4", "F2A4", "E2G3", 
-			  "C3E4", "E3G4", "F3A5", "D3F4", "E3G4", "", "C3E4", "A3C4", "B3D4", "G2B4", "",
-	                  
-			  "C2", "G4", "G2F#4", "F4", "D#4", "C3D#4", "C3E4", "F2", "F2G#3", "A4", "C3C4",
-	                  "", "C3", "C3A4", "F2C4", "F2D4", "C2", "G4", "G2F#4", "F4", "D#4", "G2D#4", "C3E4",
-	                  "", "G3C5", "", "G3C5", "", "G3C5", "G2", "C2", "G4", "G2F#4", "F4", "D#4", 
-			  "C3D#4", "C3E4", "F2", "F2G#3", "A4", "C3C4", "", "C3", "C3A4", "F2C4", "F2D4", 
-			  "C2", "Ab3Eb4", "", "Bb3D4", "", "C3C4", "", "G2", "", "G2", "C2", "",
-			  "C2", "G4", "G2F#4", "F4", "D#4", "C3D#4", "C3E4", "F2", "F2G#3", "A4", "C3C4",
-	                  "", "C3", "C3A4", "F2C4", "F2D4", "C2", "G4", "G2F#4", "F4", "D#4", "G2D#4", "C3E4",
-	                  "", "G3C5", "", "G3C5", "", "G3C5", "G2", "C2", "G4", "G2F#4", "F4", "D#4", 
-			  "C3D#4", "C3E4", "F2", "F2G#3", "A4", "C3C4", "", "C3", "C3A4", "F2C4", "F2D4", 
-			  "C2", "Ab3Eb4", "", "Bb3D4", "", "C3C4", "", "G2", "", "G2", "C2", "",
-	
-			  "Ab2C4", "Ab2", "Ab2C4", "", "Eb2C4", "", "C4", "Ab3D4", "G2E4", "G2C4", "", "C2A4",
-			  "G3", "G1G3", "Ab2C4", "Ab2", "Ab2C4", "", "Eb2C4", "", "C4", "Ab3D4", "Ab3E4", "G2", 
-			  "", "C2", "", "G1", "Ab2C4", "Ab2", "Ab2C4", "", "Eb2C4", "", "C4", "Ab3D4", "G2E4", 
-			  "G2C4", "", "C2A4", "G3", "G1G3",
-			  "D2E4", "", "D2E4", "", "D2E4", "", "D2C4", "D2E4", "G2G4", "", "G1G3", "",
+float parseInputFile (std::string filename, std::vector<Note> & notes){
+    float seconds = 0.0;
 
-	                  "G2C4", "", "E2G3", "", "C2E3", "", "F2A4", "G2B4", "Gb2Bb4", "F2A4", "E2G3", 
-			  "C3E4", "E3G4", "F3A5", "D3F4", "E3G4", "", "C3E4", "A3C4", "B3D4", "G2B4", "",
-	                  "G2C4", "", "E2G3", "", "C2E3", "", "F2A4", "G2B4", "Gb2Bb4", "F2A4", "E2G3", 
-			  "C3E4", "E3G4", "F3A5", "D3F4", "E3G4", "", "C3E4", "A3C4", "B3D4", "G2B4", "",
-	
-			  "C2E4", "C2C4", "C4", "F#2G3", "G2", "C3G#3", "F2A4", "F2F4", "F4", 
-			  "F2F4", "F2", "F2F4", "C3A4", "A4", "C3A4", "F2",
-			  "D2B4", "D2A5", "A5", "", "A5", "A5F2", "F2", "G2A5", "G2G4", "B3G4", "B3F4",
-			  "F2E4", "F2C4", "C4", "F2C4", "F2A4", "C3G3", "G3", "C3G3", "F2",
-			  "C2E4", "C2C4", "C4", "F#2G3", "G2", "C3G#3", "F2A4", "F2F4", "F4", 
-			  "F2F4", "F2", "F2F4", "C3A4", "A4", "C3A4", "F2",
-			  "G2B4", "", "G2F4", "", "G2F4", "", "G2F4", "A3E4", "B3D4", "C3G3", "C3E3", "G2E3",
-			  "G2", "G2E3", "C2C3", "",
-			  "C2E4", "C2C4", "C4", "F#2G3", "G2", "C3G#3", "F2A4", "F2F4", "F4", 
-			  "F2F4", "F2", "F2F4", "C3A4", "A4", "C3A4", "F2",
-			  "D2B4", "D2A5", "A5", "", "A5", "A5F2", "F2", "G2A5", "G2G4", "B3G4", "B3F4",
-			  "F2E4", "F2C4", "C4", "F2C4", "F2A4", "C3G3", "G3", "C3G3", "F2",
-			  "C2E4", "C2C4", "C4", "F#2G3", "G2", "C3G#3", "F2A4", "F2F4", "F4", 
-			  "F2F4", "F2", "F2F4", "C3A4", "A4", "C3A4", "F2",
-			  "G2B4", "", "G2F4", "", "G2F4", "", "G2F4", "A3E4", "B3D4", "C3G3", "C3E3", "G2E3",
-			  "G2", "G2E3", "C2C3", "",
-	
-			  "Ab2C4", "Ab2", "Ab2C4", "", "Eb2C4", "", "C4", "Ab3D4", "G2E4", "G2C4", "", "C2A4",
-			  "G3", "G1G3", "Ab2C4", "Ab2", "Ab2C4", "", "Eb2C4", "", "C4", "Ab3D4", "Ab3E4", "G2", 
-			  "", "C2", "", "G1", "Ab2C4", "Ab2", "Ab2C4", "", "Eb2C4", "", "C4", "Ab3D4", "G2E4", 
-			  "G2C4", "", "C2A4", "G3", "G1G3",
-			  "D2E4", "", "D2E4", "", "D2E4", "", "D2C4", "D2E4", "G2G4", "", "G1G3", "",
+    notes = {};
+    std::vector<std::vector<TemplateNote>> templates = {};
+    std::vector<std::string> templateNames = {};
+    std::vector<float> templateLengths = {};
+    std::vector<TemplateNote> currTemplate = {};
+    std::string currTemplateName = "";
+    float currTemplateLength = 0.0;
 
-			  "C2E4", "C2C4", "C4", "F#2G3", "G2", "C3G#3", "F2A4", "F2F4", "F4", 
-			  "F2F4", "F2", "F2F4", "C3A4", "A4", "C3A4", "F2",
-			  "D2B4", "D2A5", "A5", "", "A5", "A5F2", "F2", "G2A5", "G2G4", "B3G4", "B3F4",
-			  "F2E4", "F2C4", "C4", "F2C4", "F2A4", "C3G3", "G3", "C3G3", "F2",
-			  "C2E4", "C2C4", "C4", "F#2G3", "G2", "C3G#3", "F2A4", "F2F4", "F4", 
-			  "F2F4", "F2", "F2F4", "C3A4", "A4", "C3A4", "F2",
-			  "G2B4", "", "G2F4", "", "G2F4", "", "G2F4", "A3E4", "B3D4", "C3G3", "C3E3", "G2E3",
-			  "G2", "G2E3", "C2C3", "",
-			  "C2E4", "C2C4", "C4", "F#2G3", "G2", "C3G#3", "F2A4", "F2F4", "F4", 
-			  "F2F4", "F2", "F2F4", "C3A4", "A4", "C3A4", "F2",
-			  "D2B4", "D2A5", "A5", "", "A5", "A5F2", "F2", "G2A5", "G2G4", "B3G4", "B3F4",
-			  "F2E4", "F2C4", "C4", "F2C4", "F2A4", "C3G3", "G3", "C3G3", "F2",
-			  "C2E4", "C2C4", "C4", "F#2G3", "G2", "C3G#3", "F2A4", "F2F4", "F4", 
-			  "F2F4", "F2", "F2F4", "C3A4", "A4", "C3A4", "F2",
-			  "G2B4", "", "G2F4", "", "G2F4", "", "G2F4", "A3E4", "B3D4", "C3G3", "C3E3", "G2E3",
-			  "G2", "G2E3", "C2C3", "",
-	
-			  "G2C4", "", "E2G3", "", "C2E3", "F2A4", "F2B4", "F2A4", "Db2Ab4", "Db2Bb4", "Db2Ab4",
-			  "C2E3", "C2D3", "C2E3"};
-	
-	durationArray = {2./5, 1./10, 1./2, 1./2, 1./2, 1./2, 1./2, 1, 1, 1, 1, 1, 
-		           1, 1./2, 1, 1./2, 1, 1./2, 1, 1, 1./2, 1, 2./3, 
-			   2./3, 2./3, 1, 1./2, 1./2, 1./2, 1, 1./2, 1./2, 1, 1./2, 
-		           1, 1./2, 1, 1./2, 1, 1./2, 1, 1, 1./2, 1, 2./3, 
-			   2./3, 2./3, 1, 1./2, 1./2, 1./2, 1, 1./2, 1./2, 1, 1./2, 
+    std::string line;
+    std::ifstream musicfile(filename);
+    int bpm = 120;
+    if (musicfile.is_open()) {
+        ReadMode mode = noMode;
+        std::vector<Shape> shapes;
+        while(getline(musicfile, line)) {
+            switch(mode) {
+                case templMode:
+                case chordMode: {
+                    if(line == "</chord>") {mode = noMode; break;}
+                    if(line == "</templ>") {mode = noMode; break;}
+                    if(mode == templMode) {
+                        if(line[0] == '>') {
+                            currTemplateName = "";
+                            for (auto & c : line) if (c != '>') currTemplateName.push_back(c);
+                            currTemplate = {};
+                            currTemplateLength = 0.0;
+                            continue;
+                        } // end if
+                        if(line[0] == '<') {
+                            templateNames.push_back(currTemplateName);
+                            templates.push_back(currTemplate);
+                            templateLengths.push_back(currTemplateLength);
+                            continue;
+                        } // end if
+                    } // end if
+                    if(mode == chordMode) {
+                        if(line[0] == '>') {
+                            currTemplateName = "";
+                            for (auto & c : line) if (c != '>') currTemplateName.push_back(c);
+                            std::vector<std::string>::iterator itr = std::find(templateNames.begin(), templateNames.end(), currTemplateName);
+                            int loc = std::distance(templateNames.begin(), itr);
+                            std::vector<TemplateNote> temp = templates[loc];
+                            for(auto & tn : temp) {
+                                notes.push_back(makeNoteFromTemplate(tn, seconds));
+                            } // end for
+                            seconds += templateLengths[loc];
+                            continue;
+                        } // end if
+                    } // end if
+                    int voiceIndex = 0;
+                    float dur = 0.0;
+                    float notedur = 0.0;
+                    std::string name = "";
+                    int octave = 0;
+                    int shift = 0;
+                    double pitch = 0.0;
+                    bool doNotes = false;
+                    for (auto& c : line) {
+                        if(c == ' ') doNotes = true;
+                        if(!doNotes) {
+                            if(c == 'w') dur = 4.0;
+                            if(c == 'h') dur = 2.0;
+                            if(c == 'q') dur = 1.0;
+                            if(c == 'e') dur = 1.0/2;
+                            if(c == 't') dur = 1.0/3;
+                            if(c == 'T') dur = 2.0/3;
+                            if(c == 's') dur = 1.0/4;
+                            if(c == 'x') dur = 1.0/6;
+                            if(c == '.') dur *= 1.5;
+                            if(c == '-') break; // These are for comments
+                        } // end if
+                        else{
+                            if(c == ' ') {
+                                if(name != "") {
+                                    pitch = pitchValue(name[0], shift, octave);
+                                    if (mode == chordMode) {
+                                        if(notedur != 0.0) notes.push_back(Note(pitch, shapes[voiceIndex], seconds, notedur * 60 / bpm));
+                                        else               notes.push_back(Note(pitch, shapes[voiceIndex], seconds, dur * 60 / bpm));
+                                    } // end if
+                                    if (mode == templMode) {
+                                        if(notedur != 0.0) currTemplate.push_back(tNote(pitch, shapes[voiceIndex], currTemplateLength, notedur * 60 / bpm));
+                                        else               currTemplate.push_back(tNote(pitch, shapes[voiceIndex], currTemplateLength, dur * 60 / bpm));
+                                    } // end if
+                                    voiceIndex++;
 
-			   1, 1./2, 1./2, 1./2, 1./2, 1./2, 1./2, 1./2, 1./2, 1./2, 2./5, 1./10, 1./2, 1./2, 1./2, 
-			   1./2, 1, 1./2, 1./2, 1./2, 1./2, 1./2, 1./2, 1./2, 9./10, 1./10, 2./5, 1./10, 1, 1,
-			   1, 1./2, 1./2, 1./2, 1./2, 1./2, 1./2, 1./2, 1./2, 1./2, 2./5, 1./10, 1./2, 1./2, 1./2, 
-	                   1./2, 1, 1, 1./2, 1, 1./2, 1, 1./2, 2./5, 1./10, 1, 9./10, 1./10, 
-			   1, 1./2, 1./2, 1./2, 1./2, 1./2, 1./2, 1./2, 1./2, 1./2, 2./5, 1./10, 1./2, 1./2, 1./2, 
-			   1./2, 1, 1./2, 1./2, 1./2, 1./2, 1./2, 1./2, 1./2, 9./10, 1./10, 2./5, 1./10, 1, 1,
-			   1, 1./2, 1./2, 1./2, 1./2, 1./2, 1./2, 1./2, 1./2, 1./2, 2./5, 1./10, 1./2, 1./2, 1./2, 
-	                   1./2, 1, 1, 1./2, 1, 1./2, 1, 1./2, 2./5, 1./10, 1, 9./10, 1./10,
-	
-			   2./5, 1./10, 1./2, 1./2, 1./2, 1./2, 1./2, 1, 1./2, 1./2, 1./2, 1./2, 1, 1,
-			   2./5, 1./10, 1./2, 1./2, 1./2, 1./2, 1./2, 1./2, 1./2, 1, 1./2, 1, 1./2, 1,
-			   2./5, 1./10, 1./2, 1./2, 1./2, 1./2, 1./2, 1, 1./2, 1./2, 1./2, 1./2, 1, 1,
-			   2./5, 1./10, 1./2, 1./2, 1./2, 1./2, 1./2, 1, 1, 1, 1, 1,
+                                    notedur = 0.0;
+                                    name = "";
+                                    octave = 0;
+                                    shift = 0;
+                                    pitch = 0.0;
+                                } // end if
+                            } // end if
+                            if('A' <= c && c <= 'G') name.push_back(c);
+                            if(c == 'b') shift -= 100;
+                            if(c == '#') shift += 100;
+                            if('0' <= c && c <= '9') octave = 10 * octave + (c - '0');
+                            if(c == 'w') notedur = 4.0;
+                            if(c == 'h') notedur = 2.0;
+                            if(c == 'q') notedur = 1.0;
+                            if(c == 'e') notedur = 1.0/2;
+                            if(c == 't') notedur = 1.0/3;
+                            if(c == 'T') notedur = 2.0/3;
+                            if(c == 's') notedur = 1.0/4;
+                            if(c == 'x') notedur = 1.0/6;
+                            if(c == '!') notedur *= 0.5;
+                            if(c == ',') notedur *= 0.8;
+                            if(c == '.') notedur *= 1.5;
+                            if(c == '-') voiceIndex++;
+                        }
+                    } // end for
+                    if(name != "") {
+                        pitch = pitchValue(name[0], shift, octave);
+                        if (mode == chordMode) {
+                            if(notedur != 0.0) notes.push_back(Note(pitch, shapes[voiceIndex], seconds, notedur * 60 / bpm));
+                            else               notes.push_back(Note(pitch, shapes[voiceIndex], seconds, dur * 60 / bpm));
+                        } // end if
+                        if (mode == templMode) {
+                            if(notedur != 0.0) currTemplate.push_back(tNote(pitch, shapes[voiceIndex], currTemplateLength, notedur * 60 / bpm));
+                            else               currTemplate.push_back(tNote(pitch, shapes[voiceIndex], currTemplateLength, dur * 60 / bpm));
+                        } // end if
+                        voiceIndex++;
 
-		           1, 1./2, 1, 1./2, 1, 1./2, 1, 1, 1./2, 1, 2./3, 
-			   2./3, 2./3, 1, 1./2, 1./2, 1./2, 1, 1./2, 1./2, 1, 1./2, 
-		           1, 1./2, 1, 1./2, 1, 1./2, 1, 1, 1./2, 1, 2./3, 
-			   2./3, 2./3, 1, 1./2, 1./2, 1./2, 1, 1./2, 1./2, 1, 1./2, 
-	
-			   1./2, 1./2, 1./2, 1./2, 1, 1, 1./2, 9./20, 1./20, 9./20, 1./20, 1./2, 9./20, 1./20, 1./2, 1,
-		           2./3, 1./3, 1./4, 1./12, 1./6, 5./12, 1./12, 2./3, 1./3, 1./3, 2./3, 1./2, 2./5, 1./10, 
-			   1./2, 1./2, 2./5, 1./10, 1./2, 1,
-			   1./2, 1./2, 1./2, 1./2, 1, 1, 1./2, 9./20, 1./20, 9./20, 1./20, 1./2, 9./20, 1./20, 1./2, 1,
-			   2./5, 1./10, 9./10, 1./10, 2./5, 1./10, 2./3, 2./3, 2./3, 1./2, 1./2, 2./5, 1./10, 
-			   1./2, 1, 1,
-			   1./2, 1./2, 1./2, 1./2, 1, 1, 1./2, 9./20, 1./20, 9./20, 1./20, 1./2, 9./20, 1./20, 1./2, 1,
-		           2./3, 1./3, 1./4, 1./12, 1./6, 5./12, 1./12, 2./3, 1./3, 1./3, 2./3, 1./2, 2./5, 1./10, 
-			   1./2, 1./2, 2./5, 1./10, 1./2, 1,
-			   1./2, 1./2, 1./2, 1./2, 1, 1, 1./2, 9./20, 1./20, 9./20, 1./20, 1./2, 9./20, 1./20, 1./2, 1,
-			   2./5, 1./10, 9./10, 1./10, 2./5, 1./10, 2./3, 2./3, 2./3, 1./2, 1./2, 2./5, 1./10, 
-			   1./2, 1, 1,
-	
-			   2./5, 1./10, 1./2, 1./2, 1./2, 1./2, 1./2, 1, 1./2, 1./2, 1./2, 1./2, 1, 1,
-			   2./5, 1./10, 1./2, 1./2, 1./2, 1./2, 1./2, 1./2, 1./2, 1, 1./2, 1, 1./2, 1,
-			   2./5, 1./10, 1./2, 1./2, 1./2, 1./2, 1./2, 1, 1./2, 1./2, 1./2, 1./2, 1, 1,
-			   2./5, 1./10, 1./2, 1./2, 1./2, 1./2, 1./2, 1, 1, 1, 1, 1,
+                        notedur = 0.0;
+                        name = "";
+                        octave = 0;
+                        shift = 0;
+                        pitch = 0.0;
+                    } // end if
+                    if(mode == chordMode) seconds += dur * 60 / bpm;
+                    if(mode == templMode) currTemplateLength += dur * 60 / bpm;
+                    break;
+                }
+                case paramMode: {
+                    if(line == "</param>") {mode = noMode; break;}
+                    std::string param = "";
+                    std::string value = "";
+                    bool findParam = true;
+                    for (auto& c : line) {
+                        if(c == ' ') {findParam = false; continue;}
+                        if(findParam) {param.push_back(c); continue;}
+                        if(('A' <= c && c <= 'Z') || ('a' <= c && c <= 'z') || ('0' <= c && c <= '9')) value.push_back(c);
+                    } // end for
+                    if(param == "bpm") bpm = stoi(value);
+                    break;
+                }
+                case voiceMode: {
+                    if(line == "</voice>") {mode = noMode; break;}
+                    shapes = {};
+                    std::string voice = "";
+                    for (auto& c : line) {
+                        if(c == ' ') {
+                            shapes.push_back(stoshape(voice));
+                            voice = "";
+                        } // end if
+                        if('A' <= c && c <= 'Z') voice.push_back(c);
+                    } // end for
+                    if(voice != "") shapes.push_back(stoshape(voice));
+                    break;
+                }
+                case noMode: {
+                    if(line == "<chord>") mode = chordMode;
+                    if(line == "<templ>") mode = templMode;
+                    if(line == "<voice>") mode = voiceMode;
+                    if(line == "<param>") mode = paramMode;
+                    break;
+                }
+                default:
+                    break;
+             } // end switch
+        } // end while
+    } // end if
+    else std::cout << "File not found" << std::endl;
 
-			   1./2, 1./2, 1./2, 1./2, 1, 1, 1./2, 9./20, 1./20, 9./20, 1./20, 1./2, 9./20, 1./20, 1./2, 1,
-		           2./3, 1./3, 1./4, 1./12, 1./6, 5./12, 1./12, 2./3, 1./3, 1./3, 2./3, 1./2, 2./5, 1./10, 
-			   1./2, 1./2, 2./5, 1./10, 1./2, 1,
-			   1./2, 1./2, 1./2, 1./2, 1, 1, 1./2, 9./20, 1./20, 9./20, 1./20, 1./2, 9./20, 1./20, 1./2, 1,
-			   2./5, 1./10, 9./10, 1./10, 2./5, 1./10, 2./3, 2./3, 2./3, 1./2, 1./2, 2./5, 1./10, 
-			   1./2, 1, 1,
-			   1./2, 1./2, 1./2, 1./2, 1, 1, 1./2, 9./20, 1./20, 9./20, 1./20, 1./2, 9./20, 1./20, 1./2, 1,
-		           2./3, 1./3, 1./4, 1./12, 1./6, 5./12, 1./12, 2./3, 1./3, 1./3, 2./3, 1./2, 2./5, 1./10, 
-			   1./2, 1./2, 2./5, 1./10, 1./2, 1,
-			   1./2, 1./2, 1./2, 1./2, 1, 1, 1./2, 9./20, 1./20, 9./20, 1./20, 1./2, 9./20, 1./20, 1./2, 1,
-			   2./5, 1./10, 9./10, 1./10, 2./5, 1./10, 2./3, 2./3, 2./3, 1./2, 1./2, 2./5, 1./10, 
-			   1./2, 1, 1,
-
-			   1, 1./2, 1, 1./2, 1, 1, 1, 1, 1, 1, 1, 3./4, 3./4, 9./2,
-			   0};
-    return;
+    return seconds;
 }

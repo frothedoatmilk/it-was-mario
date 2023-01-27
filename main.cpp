@@ -2,24 +2,29 @@
 #include <math.h>
 
 #ifndef IO
+#define IO
 #include <iostream>
+#include <fstream>
 #endif
 
 #ifndef STRINGLIBS
+#define STRINGLIBS
 #include <string>
 #include <cstring>
 #endif
 
 #ifndef FILELIB
+#define FILELIB
 #include <cstdio>
 #endif
 
 #ifndef VECTOR
+#define VECTOR
 #include <vector>
 #endif
 
 #include "file_parse.h"
-#include "chord.cpp" // FIXME: I don't know C++ enough to do or care about header files
+#include "chord.h"
 
 float min(float a, float b) {
     if(b < 0) return 0;
@@ -29,24 +34,14 @@ float min(float a, float b) {
 
 int main(int argc, char* argv[]) {
 
-    const float bpm = 180;
-    std::vector<float> durations;
-    std::vector<std::string> strings;
-    std::vector<Chord> chord;
+    float seconds = 0.0;
+    std::vector<Note> notes;
 
-    // THIS IS NOT IMPLEMENTED. 
     std::cout << "Parsing something..." << std::endl;
-    parseInputFile(NULL, strings, durations);
-    std::cout << "Parsed! Found " << chords.size() << " chords." << std::endl;
+    seconds = parseInputFile("mario.stuff", notes);
+    std::cout << "Parsed! Found " << notes.size() << " notes." << std::endl;
 
-    double beats = 0.0;
-    for(int i = 0; i < strings.size; i++) {
-        chords.push_back(Chord(strings[i], beats, durations[i], bpm));
-        beats += durations[i];
-    }
-    
     short data;
-    long long index = 0;
 
     // Speed and volume settings
     float amplitude = 0.2;
@@ -60,29 +55,24 @@ int main(int argc, char* argv[]) {
         }
     }
 
-    const float seconds = beats * 60 / bpm;
-
     // Initialize WAV    
-    // fmt chunk, also can be used as a config kinda?
     const int subchunk1Size = 16;
     const int audioFormat = 1;
     const int numChannels = 1;
     const int sampleRate = 44100;
-    const int blockAlign = 4;
+    const int blockAlign = 2;
     const int byteRate = sampleRate * blockAlign;
     const int bitsPerSample = 8 * blockAlign / numChannels;
-
     const int subchunk2Size = sampleRate * blockAlign * (int) (seconds+2);
-
     const int chunkSize = subchunk1Size + subchunk2Size + 20;
 
     std::cout << "Opening and formatting WAV..." << std::endl;
+
     // Write the wav header
     FILE* wav = fopen("test.wav", "wb");
     fwrite("RIFF", sizeof(char), 4, wav);
     fwrite(&chunkSize, sizeof(chunkSize), 1, wav);
     fwrite("WAVEfmt ", sizeof(char), 8, wav);
-
     fwrite(&subchunk1Size , sizeof(int),   1, wav);
     fwrite(&audioFormat   , sizeof(int)/2, 1, wav);
     fwrite(&numChannels   , sizeof(int)/2, 1, wav);
@@ -93,28 +83,19 @@ int main(int argc, char* argv[]) {
     fwrite("data", sizeof(char), 4, wav);
     fwrite(&subchunk2Size, sizeof(int), 1, wav);
     
-    double decres;
-    float notes[10];
-    int length;
+    std::cout << "Processing " << notes.size() << " chords..." << std::endl;
 
-    std::cout << "Processing " << numChords << " chords..." << std::endl;
-    for(int i = 0; i < numChords; i++) {
-        parseNotes(chords[i], notes, &length);
-        for(int j = 0; j < sampleRate*seconds*durations[i]/beats; j++) {
-            data = 0;
-            for(auto & chord : chords) {
-                data += chord.getAmplitude(amplitude, index);
-            } // end k for
-            index++;
-            // Make int
-            //dataint = data * pow(2, bitsPerSample);
-            //if(dataint >= pow(2, bitsPerSample)) { std::cout << "Writing impossible value to WAV at sample " << index << "!" << std::endl; }
-            // Write left
-            fwrite(&dataint, sizeof(data), 1, wav);
-            // Write right
-            if(numChannels == 2) fwrite(&dataint, sizeof(data), 1, wav);
-        } // end j for
-    } // end i for
+    for(int index = 0; index < sampleRate*seconds; index++) {
+        data = 0;
+        for(int i = 0; i < notes.size(); i++) {
+            if(notes[i].isNotStart(index)) break;
+            data += notes[i].getAmplitude(amplitude, index);
+            if(notes[i].isDone()) {notes.erase(notes.begin()+i); i--;}
+        } // end k for
+        fwrite(&data, sizeof(data), 1, wav);
+        // Write right
+        if(numChannels == 2) fwrite(&data, sizeof(data), 1, wav);
+    } // end j for
 
     fclose(wav);
 

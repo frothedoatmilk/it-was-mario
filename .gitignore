@@ -1,4 +1,5 @@
 .vscode
-*.stuff
 a.out
+a.exe
 *.wav
+.*~

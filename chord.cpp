@@ -1,33 +1,30 @@
-#include <math.h>
-#include <string>
-#include <vector>
-// #include <iostream>
-
-typedef struct structnote {
-    int octave;
-    int shift;
-    std::string name;
-    double pitch;
-} Note;
+#include "chord.h"
 
 // Double later maybe
 int noteValue(char c, int shift, int octave) {
-    int value = 12 * octave;
+    int value = 12 * (octave + 1);
     switch(c) {
         case 'A':
             value += 0;
+            break;
         case 'B':
             value += 2;
+            break;
         case 'C':
-            value += 4 - 12;
+            value += 3;
+            break;
         case 'D':
-            value += 5 - 12;
+            value += 5;
+            break;
         case 'E':
-            value += 7 - 12;
+            value += 7;
+            break;
         case 'F':
-            value += 8 - 12;
+            value += 8;
+            break;
         case 'G':
-            value += 10 - 12;
+            value += 10;
+            break;
         default:
             value = value; // Just cause
     } // end switch
@@ -37,67 +34,49 @@ int noteValue(char c, int shift, int octave) {
     return value;
 } // end noteValue
 
-class Chord {
-private:
-    std::vector<Note> notes;
-    int startTime;
-    bool done;
-    short lastAmp;
-    double duration;
-    double bpm;
-public:
-    Chord(std::string str, double startBeat, double dur, double bpmm) {
-        lastAmp = 0;
-        duration = dur;
-        startTime = round(44100 * startBeat * dur / bpmm);
-        bpm = bpmm;
-        done = false;
-        
-        int n = str.length();
-        int oct = 0;
-        int shif = 0;
-        std::string nam = "";
-        double pit = 0.0;
-        for(int i = 0; i < n; i++) {
-            if('A' <= str[i] && str[i] <= 'G' && i != 0) {
-                Note note;
-                note.octave = oct;
-                note.shift = shif;
-                note.name = nam;
-                note.pitch = 27.5 * pow(2.0,noteValue(nam[0], shif, oct) / 12.0);
-                notes.push_back(note);
-                oct = 0;
-                shif = 0;
-                nam = "";
-                nam.push_back(str[i]);
-                pit = 0.0;
-            } // end if
-            if('0' <= str[i] && str[i] <= '9') {
-                oct = 10 * oct + (str[i] - '0');
-            }
-            if(str[i] == 'b') shif -= 100;
-            if(str[i] == '#') shif += 100;
-        } // end for
-    } // end chord
+double pitchValue(char c, int shift, int octave) {
+    return 27.5 * pow(2.0,noteValue(c, shift, octave) / 12.0);
+} // end pitchValue
 
-    bool getDone() {return done;}
+Note::Note(double pitc, Shape shap, double startSec, double duration) {
+    pitch = pitc;
+    shape = shap;
+    startFrame = round(44100 * startSec);
+    endFrame = round(44100 * (startSec + duration));
+    done = false;
+} // end Chord
 
-    int getAmplitude(float amp, int time) {
-        if (time < startTime) return 0;
-        isDone();
-        if (done) return 0;
+bool Note::isDone() {return done;}
+bool Note::isNotStart(int frame) {return startFrame > frame;}
 
-        if(amp < 0 || amp > 1) return -1;
-        double ret = 0;
-        for(auto & elem : notes) {
-            double p = sin((M_PI / 44100.0) * elem.pitch * (time - startTime));
-            ret += amp * p;
-        } // end for
-        lastAmp = (short) round(ret * 32767);
-        return lastAmp; // 32767 is 2^15-1, i.e. max signed 16-bit int
-    } // end getAmplitude
+double tent(double x) {
+    if(x <= 1) return x;
+    else       return 2-x;
+}
 
-    void isDone() {
-        if ((-328 <= lastAmp && lastAmp <= 328)) done = true;
-    } // end isDone
-};
+int Note::getAmplitude(float amp, int frame) {
+    if (done) {
+	return 0;
+    }
+    if (frame < startFrame) {
+	return 0;
+    }
+    if (frame > endFrame) testDone();
+    if(amp < 0 || amp > 1) return -1;
+
+    // This is sawtooth
+    double val = pitch * (frame - startFrame) / 44100;
+    if(shape == sineShape) val = sin(M_PI * val);
+    else if(shape == squareShape) val = 2*round(val)-1;
+    else if(shape == sawtoothShape) val = val;
+    else if(shape == triangleShape) val = tent(2*round(val)-1);
+    else val = 0;
+    lastAmp = (short) round(val * 32767);
+    return (short) round(amp * val * 32767); // 32767 is 2^15-1, i.e. max signed 16-bit int
+} // end getAmplitude
+
+void Note::testDone() {
+    //if ((-164 <= lastAmp && lastAmp <= 164)) done = true;
+    //done = true;
+    if ((-328 <= lastAmp && lastAmp <= 328)) done = true;
+} // end isDone

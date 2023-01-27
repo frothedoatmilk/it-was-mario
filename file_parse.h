@@ -1,17 +1,34 @@
+#ifndef FILEPARSE_H
+#define FILEPARSE_H
+
 #ifndef STRINGLIBS
+#define STRINGLIBS
 #include <string>
 #include <cstring>
 #endif
 
 #ifndef FILELIB
+#define FILELIB
 #include <cstdio>
 #endif
 
 #ifndef VECTOR
+#define VECTOR
 #include <vector>
 #endif
 
-// Function to turn the .stuff format into usable arrays for the synth
-// WILL NOT CLOSE THE FILE!
-// TODO: IMPLEMENT CORRECTLY.
-void parseInputFile (FILE* toParse, std::vector<std::string>& chordArray, std::vector<float>& durationArray);
+#ifndef IO
+#define IO
+#include <iostream>
+#include <fstream>
+#endif
+
+#ifndef ALGO
+#define ALGO
+#include <algorithm>
+#endif
+
+#include "chord.h"
+
+float parseInputFile (std::string filename, std::vector<Note> & noteArray);
+#endif

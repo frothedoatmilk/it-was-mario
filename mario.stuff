@@ -1,0 +1,260 @@
+<param>
+bpm 180
+</param>
+<voice>
+SINE SINE
+</voice>
+<templ>
+>INTRO
+e E4,  D2,
+e E4,  D2,
+e -    -
+e E4,  D2,
+e -    -
+e C4,  D2,
+q E4,  D2,
+-
+q G4   G2
+q -    -
+q G3   G1
+q -    -
+<INTRO
+
+>CHORUS
+q C4   G2
+e -    -
+q G3   E2
+e -    -
+q E3   C2
+-
+e -    -
+q A4   F2
+q B4   G2
+e Bb4  Gb2
+q A4   F2
+-
+T G3   E2
+T E4   C3
+T G4   E3
+q A5   F3
+e F4   D3
+e G4   E3
+-
+e -    -
+q E4   C3
+e C4   A3
+e D4   B3
+q B4   G2
+e -
+<CHORUS
+
+>VERSE1
+q -    C2
+e G4   -
+e F#4  G2
+e F4   -
+e D#4q -
+e -    C3q
+e E4   -
+-
+e -    F2q
+e G#3  -
+e A4   -
+e C4   C3,
+e -    C3q
+e A4   -
+e C4   F2q
+e D4   -
+-
+q -    C2
+e G4   -
+e F#4  G2
+e F4   -
+e D#4q -
+e -    G2
+e E4   C3
+-
+e -    -
+q C5,  G3,
+e C5,  G3,
+q C5   G3
+q -    G2
+-
+q -    C2
+e G4   -
+e F#4  G2
+e F4   -
+e D#4q -
+e -    C3q
+e E4   -
+-
+e -    F2q
+e G#3  -
+e A4   -
+e C4   C3,
+e -    C3q
+e A4   -
+e C4   F2q
+e D4   -
+-
+q -    C2
+q Eb4  Ab3
+e -    -
+q D4   Bb3
+e -    -
+-
+q C4   C3
+e -    -
+e -    G2,
+q -    G2
+q -    C2
+<VERSE1
+
+>VERSE2
+e C4,  Ab2q
+e C4   -
+e -    -
+e C4   Eb2
+e -    -
+e C4   -
+q D4   Ab3
+-
+e E4   G2q
+e C4   -
+e -    -
+e A4   C2
+q G3h  -
+q -    G1
+-
+e C4,  Ab2q
+e C4   -
+e -    -
+e C4   Eb2
+e -    -
+e C4   -
+e D4   Ab3q
+e E4   -
+-
+q -    G2
+e -    -
+e -    C2
+q -    -
+q -    G1
+-
+e C4,  Ab2q
+e C4   -
+e -    -
+e C4   Eb2
+e -    -
+e C4   -
+q D4   Ab3
+-
+e E4   G2q
+e C4   -
+e -    -
+e A4   C2
+q G3h  -
+q -    G1
+<VERSE2
+
+>VERSE3
+e E4   C2q
+e C4q  -
+e -    -
+e G3   F#2
+q -    G2
+q G#3  C3
+-
+e A4   F2q
+e F4q  -
+e -    F2q
+e F4   -
+e A4q  C3,
+e -    C3
+q -    F2
+-
+T B4   D2q
+T A5,  -
+x A5T, -
+e -    F2
+T A5   G2q
+t G4T  -
+t -    B3q
+T F4   -
+-
+e E4   F2q'
+e C4q  -
+e -    F2q
+e A4   -
+e G3q  C3'
+e -    C3
+q -    F2
+-
+e E4   C2q
+e C4q  -
+e -    -
+e G3   F#2
+q -    G2
+q G#3  C3
+-
+e A4   F2q
+e F4q  -
+e -    F2q
+e F4   -
+e A4q  C3,
+e -    C3
+q -    F2
+-
+e B4   G2,
+q F4,  G2,
+e F4,  G2,
+T F4   G2
+T E4   A3
+T D4   B3
+-
+e G3   C3q
+e E3q, -
+e -    G2q
+e E3   -
+q C3   C2
+q -    -
+<VERSE3
+
+>END
+q C4   G2
+e -    -
+q G3   E2
+e -    -
+q E3   C2
+-
+T A4   F2h
+T B4   -
+T A4   -
+T Ab4  Db2h
+T Bb4  -
+T Ab4  -
+-
+e  E3  C2w
+e  D3  -
+h. E3  -
+<END
+</templ>
+
+<chord>
+>INTRO
+>CHORUS
+>CHORUS
+>VERSE1
+>VERSE1
+>VERSE2
+>INTRO
+>CHORUS
+>CHORUS
+>VERSE3
+>VERSE3
+>VERSE2
+>INTRO
+>VERSE3
+>VERSE3
+>END
+</chord>
