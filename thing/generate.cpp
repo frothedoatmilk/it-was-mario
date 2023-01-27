@@ -17,15 +17,6 @@ void generate(std::string filename, float amplitude) {
 
     short data;
 
-    // Speed and volume settings
-    if(amplitude != 0.2) {
-        std::cout << "New amplitude found in arguments..." << std::endl;
-        if(amplitude < 0.0 || amplitude > 1.0) {
-            std::cout << "Amplitude outside acceptable range" << std::endl;
-	    return;
-        }
-    }
-
     // Initialize WAV    
     const int subchunk1Size = 16;
     const int audioFormat = 1;
