@@ -6,7 +6,7 @@
 
 There are four different modes marked by XML markers in 
 protocol 1 - `chord`, `templ`, `voice`, and `param`. The 
-`param` marker allows for simple paarmeters to be input 
+`param` marker allows for simple parameters to be input 
 about the song, such as the tempo. The `voice` marker 
 allows for an input of a collection of waveforms for 
 each of the different voices. These are always 
@@ -47,7 +47,7 @@ by their order and the input from the `voice` marker.
 There cannot be more notes listed than voices 
 specified above for this reason. What happens in this 
 case is probably some generic C++ error, though this 
-was never tested. 
+hasn't been tested as of writing this specification. 
 
 Notes are described using a capital letter followed 
 by a possible sharp (#) or flat (b) symbol, if an 
@@ -60,7 +60,7 @@ in the zeroth octave unlike the standard. Each A
 is the lowest representative of its octave, with 
 the higest being G. After this, a number of extra 
 tags can be used. The tags `!`, `:`, `;`, and `,` 
-will add some space betwee successive notes which 
+will add some space between successive notes which 
 is useful when two notes are to be played back to 
 back but they are distinct notes. A length tag 
 can also be added which specifies that the note 
