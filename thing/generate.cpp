@@ -12,7 +12,7 @@ void generate(std::string filename, float amplitude) {
     std::vector<Note> notes;
 
     std::cout << "Parsing something..." << std::endl;
-    seconds = parseInputFile("stuf\\" + filename, notes);
+    seconds = parseInputFile("stuf/" + filename, notes);
     std::cout << "Parsed! Found " << notes.size() << " notes." << std::endl;
 
     short data;
@@ -40,7 +40,7 @@ void generate(std::string filename, float amplitude) {
     std::cout << "Opening and formatting WAV..." << std::endl;
 
     // Write the wav header
-    FILE* wav = fopen("../music.wav", "wb");
+    FILE* wav = fopen("music.wav", "wb");
     fwrite("RIFF", sizeof(char), 4, wav);
     fwrite(&chunkSize, sizeof(chunkSize), 1, wav);
     fwrite("WAVEfmt ", sizeof(char), 8, wav);

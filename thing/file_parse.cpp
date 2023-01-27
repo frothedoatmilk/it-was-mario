@@ -27,7 +27,8 @@ float parseInputFile1 (std::string filename, std::vector<Note> & notes);
 
 float parseInputFile (std::string filename, std::vector<Note> & notes){
     if(filename.back() == '1') return parseInputFile1(filename, notes);
-    return -1; // error
+    std::cout << "Something (bad) happened when trying to open a STUF file" << std::endl;
+    throw;
 } // end parseFile
 
 ////////////////////////////////////////////////////////////////////////
@@ -44,7 +45,7 @@ float parseInputFile1 (std::string filename, std::vector<Note> & notes){
     float currTemplateLength = 0.0;
 
     std::string line;
-    std::ifstream musicfile(filename);
+    std::ifstream musicfile(filename, std::ifstream::in);
     int bpm = 120;
     int protocol = 1;
     if (musicfile.is_open()) {
@@ -212,7 +213,7 @@ float parseInputFile1 (std::string filename, std::vector<Note> & notes){
              } // end switch
         } // end while
     } // end if
-    else std::cout << "File not found" << std::endl;
+    else { std::cout << "Failed to open " << filename << std::endl; throw; }
 
     return seconds;
 }
