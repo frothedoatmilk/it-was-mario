@@ -23,7 +23,16 @@ Note makeNoteFromTemplate(TemplateNote tn, float startSec) {
     return Note(tn.pitch, tn.shape, tn.startSec + startSec, tn.duration);
 } // end makeNoteFromTemplate
 
+float parseInputFile1 (std::string filename, std::vector<Note> & notes);
+
 float parseInputFile (std::string filename, std::vector<Note> & notes){
+    if(filename.back() == '1') return parseInputFile1(filename, notes);
+    return -1; // error
+} // end parseFile
+
+////////////////////////////////////////////////////////////////////////
+
+float parseInputFile1 (std::string filename, std::vector<Note> & notes){
     float seconds = 0.0;
 
     notes = {};
@@ -37,6 +46,7 @@ float parseInputFile (std::string filename, std::vector<Note> & notes){
     std::string line;
     std::ifstream musicfile(filename);
     int bpm = 120;
+    int protocol = 1;
     if (musicfile.is_open()) {
         ReadMode mode = noMode;
         std::vector<Shape> shapes;
@@ -53,7 +63,7 @@ float parseInputFile (std::string filename, std::vector<Note> & notes){
                             currTemplate = {};
                             currTemplateLength = 0.0;
                             continue;
-                        } // end if
+                            } // end if
                         if(line[0] == '<') {
                             templateNames.push_back(currTemplateName);
                             templates.push_back(currTemplate);
@@ -78,6 +88,7 @@ float parseInputFile (std::string filename, std::vector<Note> & notes){
                     int voiceIndex = 0;
                     float dur = 0.0;
                     float notedur = 0.0;
+                    float lenshift = 1.0;
                     std::string name = "";
                     int octave = 0;
                     int shift = 0;
@@ -102,16 +113,17 @@ float parseInputFile (std::string filename, std::vector<Note> & notes){
                                 if(name != "") {
                                     pitch = pitchValue(name[0], shift, octave);
                                     if (mode == chordMode) {
-                                        if(notedur != 0.0) notes.push_back(Note(pitch, shapes[voiceIndex], seconds, notedur * 60 / bpm));
-                                        else               notes.push_back(Note(pitch, shapes[voiceIndex], seconds, dur * 60 / bpm));
+                                        if(notedur != 0.0) notes.push_back(Note(pitch, shapes[voiceIndex], seconds, lenshift * notedur * 60 / bpm));
+                                        else               notes.push_back(Note(pitch, shapes[voiceIndex], seconds, lenshift * dur * 60 / bpm));
                                     } // end if
                                     if (mode == templMode) {
-                                        if(notedur != 0.0) currTemplate.push_back(tNote(pitch, shapes[voiceIndex], currTemplateLength, notedur * 60 / bpm));
-                                        else               currTemplate.push_back(tNote(pitch, shapes[voiceIndex], currTemplateLength, dur * 60 / bpm));
+                                        if(notedur != 0.0) currTemplate.push_back(tNote(pitch, shapes[voiceIndex], currTemplateLength, lenshift * notedur * 60 / bpm));
+                                        else               currTemplate.push_back(tNote(pitch, shapes[voiceIndex], currTemplateLength, lenshift * dur * 60 / bpm));
                                     } // end if
                                     voiceIndex++;
 
                                     notedur = 0.0;
+                                    lenshift = 1.0;
                                     name = "";
                                     octave = 0;
                                     shift = 0;
@@ -125,30 +137,33 @@ float parseInputFile (std::string filename, std::vector<Note> & notes){
                             if(c == 'w') notedur = 4.0;
                             if(c == 'h') notedur = 2.0;
                             if(c == 'q') notedur = 1.0;
+                            if(c == 'T') notedur = 2.0/3;
                             if(c == 'e') notedur = 1.0/2;
                             if(c == 't') notedur = 1.0/3;
-                            if(c == 'T') notedur = 2.0/3;
                             if(c == 's') notedur = 1.0/4;
                             if(c == 'x') notedur = 1.0/6;
-                            if(c == '!') notedur *= 0.5;
-                            if(c == ',') notedur *= 0.8;
                             if(c == '.') notedur *= 1.5;
+                            if(c == '!') lenshift *= 0.3;
+                            if(c == ':') lenshift *= 0.5;
+                            if(c == ';') lenshift *= 0.8;
+                            if(c == ',') lenshift *= 0.9;
                             if(c == '-') voiceIndex++;
                         }
                     } // end for
                     if(name != "") {
                         pitch = pitchValue(name[0], shift, octave);
                         if (mode == chordMode) {
-                            if(notedur != 0.0) notes.push_back(Note(pitch, shapes[voiceIndex], seconds, notedur * 60 / bpm));
-                            else               notes.push_back(Note(pitch, shapes[voiceIndex], seconds, dur * 60 / bpm));
+                            if(notedur != 0.0) notes.push_back(Note(pitch, shapes[voiceIndex], seconds, lenshift * notedur * 60 / bpm));
+                            else               notes.push_back(Note(pitch, shapes[voiceIndex], seconds, lenshift * dur * 60 / bpm));
                         } // end if
                         if (mode == templMode) {
-                            if(notedur != 0.0) currTemplate.push_back(tNote(pitch, shapes[voiceIndex], currTemplateLength, notedur * 60 / bpm));
-                            else               currTemplate.push_back(tNote(pitch, shapes[voiceIndex], currTemplateLength, dur * 60 / bpm));
+                            if(notedur != 0.0) currTemplate.push_back(tNote(pitch, shapes[voiceIndex], currTemplateLength, lenshift * notedur * 60 / bpm));
+                            else               currTemplate.push_back(tNote(pitch, shapes[voiceIndex], currTemplateLength, lenshift * dur * 60 / bpm));
                         } // end if
                         voiceIndex++;
 
                         notedur = 0.0;
+                        lenshift = 1.0;
                         name = "";
                         octave = 0;
                         shift = 0;
@@ -156,19 +171,6 @@ float parseInputFile (std::string filename, std::vector<Note> & notes){
                     } // end if
                     if(mode == chordMode) seconds += dur * 60 / bpm;
                     if(mode == templMode) currTemplateLength += dur * 60 / bpm;
-                    break;
-                }
-                case paramMode: {
-                    if(line == "</param>") {mode = noMode; break;}
-                    std::string param = "";
-                    std::string value = "";
-                    bool findParam = true;
-                    for (auto& c : line) {
-                        if(c == ' ') {findParam = false; continue;}
-                        if(findParam) {param.push_back(c); continue;}
-                        if(('A' <= c && c <= 'Z') || ('a' <= c && c <= 'z') || ('0' <= c && c <= '9')) value.push_back(c);
-                    } // end for
-                    if(param == "bpm") bpm = stoi(value);
                     break;
                 }
                 case voiceMode: {
@@ -183,6 +185,19 @@ float parseInputFile (std::string filename, std::vector<Note> & notes){
                         if('A' <= c && c <= 'Z') voice.push_back(c);
                     } // end for
                     if(voice != "") shapes.push_back(stoshape(voice));
+                    break;
+                }
+                case paramMode: {
+                    if(line == "</param>") {mode = noMode; break;}
+                    std::string param = "";
+                    std::string value = "";
+                    bool findParam = true;
+                    for (auto& c : line) {
+                        if(c == ' ') {findParam = false; continue;}
+                        if(findParam) {param.push_back(c); continue;}
+                        if(('A' <= c && c <= 'Z') || ('a' <= c && c <= 'z') || ('0' <= c && c <= '9')) value.push_back(c);
+                    } // end for
+                    if(param == "bpm") bpm = stoi(value);
                     break;
                 }
                 case noMode: {

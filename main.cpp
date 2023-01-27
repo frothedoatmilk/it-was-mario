@@ -1,104 +1,10 @@
-#include <stdio.h>
-#include <math.h>
-
 #ifndef IO
 #define IO
 #include <iostream>
-#include <fstream>
 #endif
 
-#ifndef STRINGLIBS
-#define STRINGLIBS
-#include <string>
-#include <cstring>
-#endif
+#include "thing/generate.h"
 
-#ifndef FILELIB
-#define FILELIB
-#include <cstdio>
-#endif
-
-#ifndef VECTOR
-#define VECTOR
-#include <vector>
-#endif
-
-#include "file_parse.h"
-#include "chord.h"
-
-float min(float a, float b) {
-    if(b < 0) return 0;
-    if(a < b) return a;
-    else      return b;
-} // end min
-
-int main(int argc, char* argv[]) {
-
-    float seconds = 0.0;
-    std::vector<Note> notes;
-
-    std::cout << "Parsing something..." << std::endl;
-    seconds = parseInputFile("mario.stuff", notes);
-    std::cout << "Parsed! Found " << notes.size() << " notes." << std::endl;
-
-    short data;
-
-    // Speed and volume settings
-    float amplitude = 0.2;
-
-    if(argc == 2) {
-        std::cout << "New amplitude found in arguments..." << std::endl;
-        float checkAmp = std::stof(argv[1]);
-        if(checkAmp >= 0.0 && checkAmp <= 1.0) {
-            amplitude = checkAmp;
-            std::cout << "New amplitude is: " << checkAmp << std::endl;
-        }
-    }
-
-    // Initialize WAV    
-    const int subchunk1Size = 16;
-    const int audioFormat = 1;
-    const int numChannels = 1;
-    const int sampleRate = 44100;
-    const int blockAlign = 2;
-    const int byteRate = sampleRate * blockAlign;
-    const int bitsPerSample = 8 * blockAlign / numChannels;
-    const int subchunk2Size = sampleRate * blockAlign * (int) (seconds+2);
-    const int chunkSize = subchunk1Size + subchunk2Size + 20;
-
-    std::cout << "Opening and formatting WAV..." << std::endl;
-
-    // Write the wav header
-    FILE* wav = fopen("test.wav", "wb");
-    fwrite("RIFF", sizeof(char), 4, wav);
-    fwrite(&chunkSize, sizeof(chunkSize), 1, wav);
-    fwrite("WAVEfmt ", sizeof(char), 8, wav);
-    fwrite(&subchunk1Size , sizeof(int),   1, wav);
-    fwrite(&audioFormat   , sizeof(int)/2, 1, wav);
-    fwrite(&numChannels   , sizeof(int)/2, 1, wav);
-    fwrite(&sampleRate    , sizeof(int),   1, wav);
-    fwrite(&byteRate      , sizeof(int),   1, wav);
-    fwrite(&blockAlign    , sizeof(int)/2, 1, wav);
-    fwrite(&bitsPerSample , sizeof(int)/2, 1, wav);
-    fwrite("data", sizeof(char), 4, wav);
-    fwrite(&subchunk2Size, sizeof(int), 1, wav);
-    
-    std::cout << "Processing " << notes.size() << " chords..." << std::endl;
-
-    for(int index = 0; index < sampleRate*seconds; index++) {
-        data = 0;
-        for(int i = 0; i < notes.size(); i++) {
-            if(notes[i].isNotStart(index)) break;
-            data += notes[i].getAmplitude(amplitude, index);
-            if(notes[i].isDone()) {notes.erase(notes.begin()+i); i--;}
-        } // end k for
-        fwrite(&data, sizeof(data), 1, wav);
-        // Write right
-        if(numChannels == 2) fwrite(&data, sizeof(data), 1, wav);
-    } // end j for
-
-    fclose(wav);
-
-    return 0;
-
-} // end main
+int main(int argc, char** argv) {
+    generate("mario.stuf1", 0.2);
+}

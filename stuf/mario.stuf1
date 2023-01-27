@@ -1,18 +1,19 @@
 <param>
 bpm 180
+protocol 1
 </param>
 <voice>
-SINE SINE
+TRIANGLE TRIANGLE
 </voice>
 <templ>
 >INTRO
 e E4,  D2,
-e E4,  D2,
+e E4   D2
 e -    -
-e E4,  D2,
+e E4   D2
 e -    -
-e C4,  D2,
-q E4,  D2,
+e C4   D2
+q E4   D2
 -
 q G4   G2
 q -    -
@@ -166,7 +167,7 @@ q -    G2
 q G#3  C3
 -
 e A4   F2q
-e F4q  -
+e F4q, -
 e -    F2q
 e F4   -
 e A4q  C3,
@@ -198,7 +199,7 @@ q -    G2
 q G#3  C3
 -
 e A4   F2q
-e F4q  -
+e F4q, -
 e -    F2q
 e F4   -
 e A4q  C3,

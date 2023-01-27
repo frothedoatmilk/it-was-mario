@@ -2,7 +2,7 @@
 
 // Double later maybe
 int noteValue(char c, int shift, int octave) {
-    int value = 12 * (octave + 1);
+    int value = 12 * octave;
     switch(c) {
         case 'A':
             value += 0;
@@ -66,10 +66,10 @@ int Note::getAmplitude(float amp, int frame) {
 
     // This is sawtooth
     double val = pitch * (frame - startFrame) / 44100;
-    if(shape == sineShape) val = sin(M_PI * val);
-    else if(shape == squareShape) val = 2*round(val)-1;
-    else if(shape == sawtoothShape) val = val;
-    else if(shape == triangleShape) val = tent(2*round(val)-1);
+    if(shape == sineShape) val = sin(2 * M_PI * val);
+    else if(shape == squareShape) val = round(val - floor(val));
+    else if(shape == sawtoothShape) val = val - floor(val);
+    else if(shape == triangleShape) val = tent(2*(val - floor(val)));
     else val = 0;
     lastAmp = (short) round(val * 32767);
     return (short) round(amp * val * 32767); // 32767 is 2^15-1, i.e. max signed 16-bit int
