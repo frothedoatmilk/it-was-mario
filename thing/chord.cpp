@@ -67,7 +67,7 @@ double pitchValue(char c, int shift, int octave) {
 } // end pitchValue
 
 Note::Note(double pitc, Shape shap, double startSec, double duration) {
-    adsr = ADSR(0.02, 0.0, 1.0, 0.02);
+    adsr = ADSR(0.014, 0.0, 1.0, 0.014);
     //adsr = ADSR(0.01, 0.01, 0.4, 0.02);
     pitch = pitc;
     shape = shap;
