@@ -1,0 +1,25 @@
+<param>
+bpm 152
+</param>
+<voice>
+SQUARE SQUARE SAWTOOTH SAWTOOTH SAWTOOTH
+</voice>
+<chord>
+q  Ab1h  Ab2h  -     -     -
+t  -     -     C3    C4    -
+t  -     -     D3    D4    -
+t  -     -     C3    C4    -
+q  -     -     G3h., G4h., -
+e. Ab1,  Ab2,  -     -     -
+s  Ab1,  Ab2,  -     -     -
+-
+q  Bb1h, Bb2h, -     -     -
+t  -     -     G3    G4    -
+t  -     -     A4    A5    -
+t  -     -     Bb4   Bb5   -
+T  Bb1,  Bb2,  F4,   F5,   -
+T  Bb1,  Bb2,  E4,   E5,   -
+T  Bb1,  Bb2,  D4,   D5,   -
+-
+q  C1:   C2:   C4:   C5:   E4:
+</chord>

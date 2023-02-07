@@ -1,0 +1,155 @@
+<param>
+bpm 104
+</param>
+<voice>
+SINE TRIANGLE
+</voice>
+<chord>
+- INTRO -
+e C2   B4h
+e G2   -
+q C3h  -
+q -    D4
+-
+e C2   A4h
+e A3   -
+q D3h  -
+e -    G3
+e -    A4
+-
+e C2   B4h
+e G2   -
+q C3h  -
+q -    D4
+-
+e C2   A4h.
+e A3   -
+h D3h  -
+--
+e B2   B4h
+e D3   -
+q A4h  -
+q -    D4
+-
+e A#2  A5h
+e C#3  -
+q G3h  -
+q -    G4
+-
+e A2   D4h
+e C3   -
+q G3h  -
+e -    C4
+e -    B4
+-
+e D2   A4h
+e A3   -
+q F#3  -
+e -    G3
+e -    A4
+--
+e C2   B4h
+e G2   -
+q C3h  -
+q -    D4
+-
+e C2   A4h
+e A3   -
+q D3h  -
+e -    G3
+e -    A4
+-
+e C2   B4h
+e G2   -
+q C3h  -
+q -    D4
+-
+e C2   A4h.
+e A3   -
+h D3h  -
+--
+e B2   B4h
+e D3   -
+q A4h  -
+q -    D4
+-
+e A#2  A5h
+e C#3  -
+q G3h  -
+q -    G4
+-
+e A2   D5w
+e C3   -
+h G3   -
+-
+e D2   -
+e A3   -
+q F#3h -
+s -    G4
+s -    A5
+s -    B5
+s -    C5
+</chord>
+<voice>
+SINE TRIANGLE TRIANGLE
+</voice>
+<chord>
+- CHORUS -
+e F2  D4h  D5h
+e A3  -
+e C3  -
+e E3  -
+e C3  C4   C5
+e A3  B4   B5
+-
+e E2  C4   C5
+e G2  B4   B5
+e B3  G3h  G4h
+e D3  -
+e B3  -
+e G2  -
+-
+e D2  C4h  C5h
+e F2  -
+e A3  -
+e C3  -
+e A3  B4   B5
+e F2  A4   A5
+-
+e C2  B4   B5
+e E2  A4   A5
+e G2  E3h  E4h
+e B3  -
+e G2  -
+e E2  -
+-
+e F2  D4h  D5h
+e A3  -
+e C3  -
+e E3  -
+e C3  C4   C5
+e A3  B4   B5
+-
+e E2  C4   C5
+e G2  B4   B5
+e B3  G3q  G4q
+e D3  -
+e B3  C4q  C5q
+e G2  -
+-
+e D2  G4h. G5h.
+e G2  -
+e Bb3 -
+e Db3 -
+e Bb3 -
+e G2  -
+-
+s A3q -   A5
+s -   -   C5
+s -   -   F5
+s -   -   A6
+e G2w -   D5
+e -   -   B6
+-
+h. -  -   G6
+</chord>

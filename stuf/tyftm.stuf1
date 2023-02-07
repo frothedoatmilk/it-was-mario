@@ -1,0 +1,69 @@
+<param>
+bpm 96
+</param>
+<voice>
+SINE TRIANGLE TRIANGLE SAWTOOTH
+</voice>
+<chord>
+- INTRO -
+e F1h.  -     -     -
+e -     C2    A3    -
+e -     F2    C3    -
+e -     A3    F3    -
+e -     C3q   A4    -
+e -     -     C4    -
+e A3    C3    E4    -
+e G#2   B3    D4    -
+-
+q G2h   Bb3h  C4    -
+e -     -     D3    -
+e -     -     D#3   -
+e C2q,  G2    E3    -
+e -     -     C4    -
+e C2q   Bb3   Ab4   -
+e -     -     G3    -
+- 3
+q F1h   A3h   C3h   F3,
+e -     -     -     F3,
+e -     -     -     F3,
+T Ab2h  Ab3h  Cb3h  F3
+T -     -     -     E3
+T -     -     -     D3
+-
+q G1h   G2h   Bb2h  C3,
+e -     -     -     C3,
+e -     -     -     C3,
+T C1q,  E2h   Bb2h  C3
+t -     -     -     D3T
+t C1q,  -     -     -
+T -     -     -     C3,
+-
+e F1q   C2q   -     C3
+e -     -     A3    A3h.
+e C2q   A3q   C3    -
+e -     -     F3    -
+e F2q   C3q   A4    -
+e -     -     F3    -
+s -     -     C3    -
+s -     -     C#3   -
+e -     -     D3    -
+-
+e C2q   G2q   Eb3   -
+e -     -     G3    -
+e C1q   Eb2q  D4    -
+e -     -     Bb4   -
+e F2q   C2q   C4    -
+e -     -     A4    -
+e C2q   F2q   F3    -
+e -     -     C3    C3
+-
+T -     -     Bb3h  D3
+T -     -     -     F3
+t -     -     -     C3
+t -     -     -     D3q
+q -     -     -     -
+e -     -     -     -
+e -     -     -     D3
+-
+e -     -     -     -
+</chord>

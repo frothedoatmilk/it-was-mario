@@ -1,9 +1,8 @@
 <param>
 bpm 180
-protocol 1
 </param>
 <voice>
-TRIANGLE TRIANGLE
+SQUARE SQUARE
 </voice>
 <templ>
 >INTRO
@@ -108,7 +107,7 @@ q C4   C3
 e -    -
 e -    G2,
 q -    G2
-q -    C2
+q -    C2,
 <VERSE1
 
 >VERSE2

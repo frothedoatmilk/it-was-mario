@@ -51,7 +51,7 @@ public:
     bool isDone();
     bool isNotStart(int frame);
 
-    void testDone();
+    void testDone(int frame);
 
     int getAmplitude(float amp, int frame);
 };
