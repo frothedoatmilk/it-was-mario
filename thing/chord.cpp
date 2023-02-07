@@ -1,5 +1,33 @@
 #include "chord.h"
 
+ADSR::ADSR() {
+    attack = 0.0;
+    decay = 0.0;
+    sustain = 1.0;
+    release = 0.0;
+}
+
+ADSR::ADSR(double a, double d, double s, double r) {
+    attack = a;
+    decay = d;
+    sustain = s;
+    release = r;
+}
+
+double ADSR::getShift(int startFrame, int endFrame, int frame) {
+    double shift = 1.0;
+    double att = 44100 * attack;
+    double dec = 44100 * decay;
+    double rel = 44100 * release;
+
+    if(frame - startFrame < att)            shift *= ((frame - startFrame) / att);
+    else if(frame - startFrame - att < dec) shift *= 1 - (1-sustain) * ((frame - startFrame - att) / dec);
+    else if(endFrame - frame < rel)         shift *= sustain * ((endFrame - frame) / rel);
+    else                                    shift *= sustain;
+
+    return shift;
+}
+
 // Double later maybe
 int noteValue(char c, int shift, int octave) {
     int value = 12 * octave;
@@ -39,6 +67,8 @@ double pitchValue(char c, int shift, int octave) {
 } // end pitchValue
 
 Note::Note(double pitc, Shape shap, double startSec, double duration) {
+    adsr = ADSR(0.02, 0.0, 1.0, 0.02);
+    //adsr = ADSR(0.01, 0.01, 0.4, 0.02);
     pitch = pitc;
     shape = shap;
     startFrame = round(44100 * startSec);
@@ -66,11 +96,15 @@ int Note::getAmplitude(float amp, int frame) {
     if(amp < 0 || amp > 1) return -1;
 
     double val = pitch * (frame - startFrame) / 44100; 
-    if     (shape == sineShape)     val = sin(2 * M_PI * val);
+    double pi = 3.141592653585753;
+    if     (shape == sineShape)     val = sin(2 * pi * val);
     else if(shape == squareShape)   val = round(val - floor(val));
     else if(shape == sawtoothShape) val = 0.5 * (val - floor(val));
     else if(shape == triangleShape) val = tent(val - floor(val));
     else                            val = 0;
+
+    val *= adsr.getShift(startFrame, endFrame, frame);
+
     lastAmp = (short) round(val * 32767);
     return (short) round(amp * val * 32767); // 32767 is 2^15-1, i.e. max signed 16-bit int
 } // end getAmplitude
